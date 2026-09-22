@@ -1,0 +1,18 @@
+services: # containers our app needs
+  db: # database service
+    image: postgres:16 # blueprint
+    container_name: walo_postgres # container name
+
+    environment: # database settings
+      POSTGRES_USER: walo
+      POSTGRES_PASSWORD: walo_password
+      POSTGRES_DB: walo_db
+
+    ports:
+      - "5432:5432" # computer : container
+
+    volumes:
+      - walo_data:/var/lib/postgresql/data # save database data
+
+volumes:
+  walo_data: # persistent storage
