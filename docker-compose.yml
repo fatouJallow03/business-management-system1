@@ -1,18 +1,53 @@
-services: # containers our app needs
-  db: # database service
-    image: postgres:16 # blueprint
-    container_name: walo_postgres # container name
+services:
+  db:
+    image: postgres:16
+    container_name: walo_postgres
 
-    environment: # database settings
+    environment:
       POSTGRES_USER: walo
       POSTGRES_PASSWORD: walo_password
       POSTGRES_DB: walo_db
 
     ports:
-      - "5432:5432" # computer : container
+      - "5432:5432"
 
     volumes:
-      - walo_data:/var/lib/postgresql/data # save database data
+      - walo_data:/var/lib/postgresql/data
+      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U walo -d walo_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      DB_USER: walo
+      DB_PASSWORD: walo_password
+      DB_NAME: walo_db
+      DB_HOST: db
+      DB_PORT: 5432
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+
+    ports:
+      - "5173:5173"
+
+    depends_on:
+      - backend
 
 volumes:
-  walo_data: # persistent storage
+  walo_data:

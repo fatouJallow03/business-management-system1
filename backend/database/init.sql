@@ -71,3 +71,11 @@ CREATE TABLE IF NOT EXISTS menu_items (
     is_available BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS recipe_ingredients (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    menu_item_id UUID NOT NULL REFERENCES menu_items(id),
+    product_id UUID NOT NULL REFERENCES products(id),
+    quantity_required NUMERIC(10,2) NOT NULL,
+    CHECK (quantity_required > 0),
+    UNIQUE (menu_item_id, product_id)
+);
