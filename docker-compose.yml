@@ -4,16 +4,16 @@ services:
     container_name: walo_postgres
 
     environment:
-      POSTGRES_USER: walo
-      POSTGRES_PASSWORD: walo_password
-      POSTGRES_DB: walo_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
 
     ports:
       - "5432:5432"
 
     volumes:
       - walo_data:/var/lib/postgresql/data
-      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./server/database/init.sql:/docker-entrypoint-initdb.d/init.sql
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U walo -d walo_db"]
@@ -21,33 +21,36 @@ services:
       timeout: 3s
       retries: 10
 
-  backend:
+  server:
     build:
-      context: ./backend
+      context: ./server
+
+    env_file:
+      - ./server/.env
 
     ports:
       - "3000:3000"
 
     environment:
-      DB_USER: walo
-      DB_PASSWORD: walo_password
-      DB_NAME: walo_db
-      DB_HOST: db
-      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
 
     depends_on:
       db:
         condition: service_healthy
 
-  frontend:
+  client:
     build:
-      context: ./frontend
+      context: ./client
 
     ports:
       - "5173:5173"
 
     depends_on:
-      - backend
+      - server
 
 volumes:
   walo_data:

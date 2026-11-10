@@ -1,0 +1,793 @@
+
+@use "../../../styles/variables" as *;
+
+/* ========================================
+   PAGE & MAIN LAYOUT
+======================================== */
+
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 2vw, 28px);
+  background: $color-background;
+  color: $color-text;
+}
+
+.layout {
+  width: min(100%, 1160px);
+  min-height: 620px;
+  display: grid;
+  grid-template-columns: minmax(0, 44%) minmax(0, 56%);
+  overflow: hidden;
+  border-radius: 24px;
+  background: #fff4e9;
+  box-shadow: 0 14px 45px rgba(52, 42, 37, 0.12);
+}
+
+/* ========================================
+   IMAGE CAROUSEL
+======================================== */
+
+.visualPanel {
+  position: relative;
+  min-width: 0;
+  min-height: 620px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #76503b;
+  color: white;
+}
+
+.imageContainer,
+.visualImage,
+.visualOverlay {
+  position: absolute;
+  inset: 0;
+}
+
+.visualImage {
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+
+.visibleImage {
+  opacity: 1;
+}
+
+.visualOverlay {
+  background: linear-gradient(
+    180deg,
+    rgba(35, 23, 14, 0.5) 0%,
+    rgba(35, 23, 14, 0.12) 38%,
+    rgba(35, 23, 14, 0.8) 100%
+  );
+}
+
+.visualContent {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  min-height: 620px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 32px 34px 46px;
+}
+
+/* The SVG logo is styled by Logo.module.scss.
+   This keeps it visible and above the images. */
+
+.visualContent > img,
+.visualContent > a {
+  position: relative;
+  z-index: 3;
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
+.visualMessage {
+  h2 {
+    margin: 12px 0 16px;
+    font-family: Georgia, serif;
+    font-size: clamp(34px, 3.7vw, 52px);
+    line-height: 1.08;
+    letter-spacing: -1.4px;
+    color: white;
+  }
+
+  > p:last-child {
+    max-width: 350px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.94);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+}
+
+.visualEyebrow {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  line-height: 1.6;
+  color: white;
+}
+
+.imageDots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+
+  button {
+    width: 30px;
+    height: 30px;
+    padding: 10px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+
+    &::after {
+      content: "";
+      display: block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    &:focus-visible {
+      outline: 2px solid white;
+      border-radius: 50%;
+    }
+  }
+
+  .activeDot::after {
+    background: white;
+  }
+}
+
+/* ========================================
+   FORM PANEL
+======================================== */
+
+.formPanel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    145deg,
+    #fff9f2 0%,
+    #fbeadd 100%
+  );
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 590px;
+  margin: auto;
+  padding: 24px clamp(22px, 3vw, 42px);
+}
+
+/* ========================================
+   NUMBERED PROGRESS INDICATOR
+======================================== */
+
+.progressHeader {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 22px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 17px;
+    left: 16%;
+    right: 16%;
+    height: 1px;
+    background: #d6b7a2;
+  }
+}
+
+.progressItem {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  text-align: center;
+}
+
+.progressCircle {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #d9b8a2;
+  border-radius: 50%;
+  background: #fff4e9;
+  color: $color-primary;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.progressCircleActive {
+  border-color: $color-primary;
+  background: $color-primary;
+  color: white;
+}
+
+.progressCircleCompleted {
+  border-color: $color-primary;
+  background: #f5dfce;
+  color: $color-primary;
+}
+
+.progressLabel {
+  color: #805b46;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ========================================
+   STEP HEADINGS
+======================================== */
+
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.stepHeading {
+  h1 {
+    margin: 0 0 7px;
+    font-family: Georgia, serif;
+    font-size: clamp(26px, 2.7vw, 33px);
+    font-weight: 700;
+    line-height: 1.16;
+    letter-spacing: -0.8px;
+    color: #402818;
+  }
+
+  p {
+    margin: 0;
+    color: #745e50;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+/* ========================================
+   BUSINESS TYPE SELECTION
+======================================== */
+
+.fieldGroup {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 10px;
+  color: #402818;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.businessTypes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.businessTypeCard {
+  position: relative;
+  min-width: 0;
+  min-height: 145px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 18px 10px 14px;
+  border: 1.5px solid #ddc4b2;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+
+  input[type="radio"] {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: $color-primary;
+  }
+
+  &:hover {
+    border-color: $color-primary;
+  }
+
+  &:focus-within {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+.businessTypeSelected {
+  border-color: $color-primary;
+  background: rgba(232, 185, 143, 0.22);
+}
+
+.businessTypeIcon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(166, 75, 50, 0.09);
+  color: $color-primary;
+}
+
+.businessTypeSelected .businessTypeIcon {
+  background: $color-primary;
+  color: white;
+}
+
+.businessTypeName {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #402818;
+}
+
+.businessTypeDescription {
+  max-width: 190px;
+  color: #745e50;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* ========================================
+   FORM FIELDS
+======================================== */
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+
+  > * {
+    min-width: 0;
+  }
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 3px 0 0;
+  color: $color-primary;
+
+  h2 {
+    margin: 0;
+    color: $color-text;
+    font-size: 13px;
+    font-weight: 700;
+  }
+}
+
+.selectField {
+  min-width: 0;
+
+  label {
+    display: block;
+    margin-bottom: 7px;
+    color: $color-text;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  select {
+    width: 100%;
+    min-width: 0;
+    min-height: 43px;
+    padding: 9px 11px;
+    border: 1px solid #d9c6b7;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    color: $color-text;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid rgba(166, 75, 50, 0.3);
+      border-color: $color-primary;
+    }
+  }
+}
+
+/* Shared Input component */
+
+.formPanel input:not([type="radio"]):not([type="checkbox"]) {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 43px;
+  padding: 9px 12px;
+  border: 1px solid #d9c6b7;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  color: $color-text;
+  font: inherit;
+  font-size: 13px;
+
+  &:focus {
+    outline: 2px solid rgba(166, 75, 50, 0.3);
+    border-color: $color-primary;
+  }
+}
+
+/* ========================================
+   PASSWORD VISIBILITY
+======================================== */
+
+.passwordField {
+  position: relative;
+
+  input {
+    padding-right: 50px !important;
+  }
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 9px;
+  bottom: 4px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: $color-muted;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-primary;
+    background: rgba(166, 75, 50, 0.07);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+  }
+}
+
+/* ========================================
+   BUTTONS & VALIDATION
+======================================== */
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.nextButton,
+.backButton {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nextButton {
+  flex: 1;
+  border: 1px solid $color-primary;
+  background: $color-primary;
+  color: white;
+
+  &:hover {
+    background: #8d3e29;
+  }
+}
+
+.backButton {
+  border: 1px solid #d8a789;
+  background: #f9e2d0;
+  color: #6c3a25;
+
+  &:hover {
+    background: #f3d5be;
+  }
+}
+
+.errorMessage {
+  margin: 12px 0 0;
+  color: $color-error;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.signInText {
+  margin: 18px 0 0;
+  text-align: center;
+  color: $color-muted;
+  font-size: 12px;
+
+  a {
+    color: $color-primary;
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* ========================================
+   DECORATIVE WEST AFRICAN PATTERN
+======================================== */
+
+.mobilePattern {
+  display: none;
+  height: 32px;
+  flex-shrink: 0;
+  background-color: $color-primary;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 8px,
+      rgba(255, 245, 230, 0.85) 8px 10px,
+      transparent 10px 18px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 8px,
+      rgba(255, 245, 230, 0.85) 8px 10px,
+      transparent 10px 18px
+    );
+  background-size: 36px 32px;
+}
+
+/* ========================================
+   TABLET LANDSCAPE
+======================================== */
+
+@media (max-width: 1050px) and (min-width: 801px) {
+  .layout {
+    grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+  }
+
+  .formContainer {
+    padding-inline: 22px;
+  }
+
+  .visualContent {
+    padding: 28px 24px 42px;
+  }
+
+  .visualMessage h2 {
+    font-size: 34px;
+  }
+}
+
+/* ========================================
+   TABLET PORTRAIT & MOBILE
+======================================== */
+
+@media (max-width: 800px) {
+  .page {
+    display: block;
+    padding: 0;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .visualPanel {
+    height: 300px;
+    min-height: 0;
+    flex-shrink: 0;
+  }
+
+  .visualPanel::after {
+    content: "";
+    position: absolute;
+    z-index: 4;
+    left: -5%;
+    bottom: -1px;
+    width: 110%;
+    height: 34px;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    background: #fff4e9;
+  }
+
+  .visualContent {
+    height: 100%;
+    min-height: 0;
+    padding: 20px 28px 42px;
+    gap: 12px;
+  }
+
+  .visualMessage h2 {
+    margin: 7px 0;
+    font-size: 27px;
+  }
+
+  .visualMessage > p:last-child {
+    max-width: 420px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .visualEyebrow {
+    font-size: 9px;
+  }
+
+  .imageDots {
+    position: absolute;
+    right: 20px;
+    bottom: 35px;
+  }
+
+  .formPanel {
+    flex: 1;
+    background: #fff4e9;
+  }
+
+  .formContainer {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 22px 26px 36px;
+  }
+
+  .mobilePattern {
+    display: block;
+    margin-top: auto;
+  }
+}
+
+/* ========================================
+   PHONES
+======================================== */
+
+@media (max-width: 480px) {
+  .visualPanel {
+    height: 280px;
+  }
+
+  .visualContent {
+    padding: 18px 20px 40px;
+  }
+
+  .visualMessage h2 {
+    font-size: 24px;
+  }
+
+  .visualMessage > p:last-child {
+    font-size: 11px;
+  }
+
+  .formContainer {
+    padding: 22px 16px 34px;
+  }
+
+  .progressHeader {
+    margin-bottom: 22px;
+  }
+
+  .progressLabel {
+    font-size: 10px;
+  }
+
+  .stepHeading h1 {
+    font-size: 26px;
+  }
+
+  .businessTypeCard {
+    min-height: 145px;
+    padding: 18px 8px 14px;
+  }
+
+  .businessTypeName {
+    font-size: 16px;
+  }
+
+  .businessTypeDescription {
+    font-size: 10px;
+  }
+
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   SMALL PHONES
+======================================== */
+
+@media (max-width: 359px) {
+  .formContainer {
+    padding-inline: 12px;
+  }
+
+  .businessTypes {
+    grid-template-columns: 1fr;
+  }
+
+  .businessTypeCard {
+    min-height: 115px;
+  }
+
+  .progressLabel {
+    font-size: 9px;
+  }
+}
+
+/* ========================================
+   SHORT LAPTOP SCREENS
+======================================== */
+
+@media (max-height: 750px) and (min-width: 801px) {
+  .page {
+    display: block;
+  }
+
+  .layout {
+    min-height: 0;
+    margin-inline: auto;
+  }
+
+  .formContainer {
+    margin-block: auto;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .visualImage,
+  .businessTypeCard {
+    transition: none;
+  }
+}

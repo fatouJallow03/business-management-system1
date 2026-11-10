@@ -1,0 +1,41 @@
+
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  width: 100%;
+  min-width: 0;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: $color-text;
+  }
+
+  input {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 12px 14px;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    background: $color-surface;
+    color: $color-text;
+    font-size: 16px;
+
+    &:focus {
+      outline: 2px solid $color-primary;
+      outline-offset: 2px;
+    }
+
+    &[aria-invalid="true"] {
+      border-color: $color-error;
+    }
+  }
+}
+
+.error {
+  color: $color-error;
+  font-size: 13px;
+}

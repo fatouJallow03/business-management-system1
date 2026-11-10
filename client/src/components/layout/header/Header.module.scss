@@ -1,0 +1,110 @@
+
+.header {
+  width: 100%;
+  background: $color-background;
+  border-bottom: 1px solid $color-border;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 16px 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logo {
+  font-family: Georgia, serif;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: $color-primary;
+  text-decoration: none;
+
+  span {
+    color: $color-secondary;
+  }
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+
+  a {
+    color: $color-text;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      color: $color-primary;
+    }
+
+    &[aria-current="page"] {
+      color: $color-primary;
+    }
+  }
+
+  .registerButton {
+    background: $color-primary;
+    color: white;
+    padding: 12px 20px;
+    border-radius: $radius-sm;
+
+    &:hover {
+      background: #8d3e29;
+      color: white;
+    }
+  }
+}
+
+.menuButton {
+  display: none;
+  background: none;
+  border: 0;
+  color: $color-primary;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding: 14px 16px;
+  }
+
+  .menuButton {
+    display: block;
+  }
+
+  .nav {
+    display: none;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    z-index: 20;
+
+    padding: 24px 16px;
+    background: $color-background;
+    border-bottom: 1px solid $color-border;
+
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+
+  .navOpen {
+    display: flex;
+  }
+}
+
+@media (max-width: 359px) {
+  .container {
+    padding-inline: 12px;
+  }
+}

@@ -1,0 +1,104 @@
+@use "./variables" as *;
+@use "./mixins" as *;
+/* ========================================
+   WALO — GLOBAL BASE STYLES
+   Mobile-first | Terracotta & Sand
+======================================== */
+
+/* 1. RESET */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+  min-height: 100vh;
+  overflow-x: clip;
+
+  background-color: $color-background;
+  color: $color-text;
+  font-family: $font-body;
+  line-height: 1.5;
+}
+
+/* 2. TYPOGRAPHY */
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-top: 0;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+}
+
+/* 3. FORM ELEMENTS */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 16px;
+}
+
+button {
+  min-height: 44px;
+  cursor: pointer;
+}
+
+/* 4. MEDIA */
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+/* 5. ACCESSIBILITY */
+:focus-visible {
+  outline: 3px solid $color-primary;
+  outline-offset: 3px;
+}
+
+/* 6. RESPONSIVE CONTAINER */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 16px;
+
+  @include xs-phone {
+    padding-inline: 12px;
+  }
+
+  @include tablet {
+    padding-inline: 24px;
+  }
+
+  @include desktop {
+    padding-inline: 32px;
+  }
+}
