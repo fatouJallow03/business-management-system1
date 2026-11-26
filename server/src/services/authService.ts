@@ -377,40 +377,47 @@ export async function checkUsername(
     return result.rows.length === 0;
 }
 
+
 /**
- * Retrieves the authenticated user's current account information.
+ * Retrieves the currently authenticated user's
+ * account and business information.
  *
- * Restricts the database query to the authenticated
- * user's ID and business ID to maintain tenant isolation.
+ * Restricts access to the authenticated user
+ * and their associated business.
  *
- * Never returns sensitive information such as password hashes.
+ * Includes email verification status without
+ * exposing sensitive authentication information.
  *
- * @param userId - The authenticated user's ID.
- * @param businessId - The authenticated user's business ID.
- * @returns Current user information or null if not found.
+ * @param userId - Authenticated user identifier.
+ * @param businessId - Authenticated business identifier.
+ * @returns Current user information or null.
  */
 export async function getCurrentUser(
-    userId: string,
-    businessId: string
+  userId: string,
+  businessId: string
 ) {
-    const result = await pool.query(
-        `SELECT
-            users.id,
-            users.username,
-            users.email,
-            users.role,
-            users.business_id AS "businessId",
-            businesses.name AS "businessName"
-         FROM users
-         INNER JOIN businesses
-            ON businesses.id = users.business_id
-         WHERE users.id = $1
-         AND users.business_id = $2`,
-        [userId, businessId]
-    );
+  const result = await pool.query(
+    `SELECT
+      users.id,
+      users.username,
+      users.email,
+      users.role,
+      users.business_id AS "businessId",
+      businesses.name AS "businessName",
+      users.email_verified_at IS NOT NULL
+        AS "emailVerified"
+    FROM users
+    INNER JOIN businesses
+      ON businesses.id = users.business_id
+    WHERE users.id = $1
+      AND users.business_id = $2
+    LIMIT 1`,
+    [userId, businessId]
+  );
 
-    return result.rows[0] ?? null;
+  return result.rows[0] ?? null;
 }
+
 /**
  * Revokes a user's active authentication session.
  *
