@@ -20,35 +20,107 @@ interface ResetAccount {
   email: string;
 }
 
+
 /**
  * Requests a password reset for an existing account.
  *
  * Security:
- * - Does not reveal whether the email exists.
- * - Generates a cryptographically secure token.
+ * - Does not reveal whether the account exists.
+ * - Limits each account to three requests per hour.
+ * - Enforces a two-minute cooldown.
+ * - Uses a database row lock to prevent concurrent
+ *   requests from bypassing the account limits.
  * - Stores only the SHA-256 token hash.
  * - Reuses Walo's existing Resend email service.
- *
- * The controller must return the same public
- * response whether the account exists or not.
  *
  * @param email - Account email address.
  */
 export async function requestPasswordReset(
   email: string
 ): Promise<void> {
-  const result = await pool.query<ResetAccount>(
-    `SELECT id, email
-     FROM users
-     WHERE LOWER(email) = LOWER($1)
-     LIMIT 1`,
-    [email]
-  );
+  const client = await pool.connect();
 
-  const account = result.rows[0];
+  let account: ResetAccount | undefined;
+  let token: string | undefined;
 
-  // Do not disclose whether the account exists.
-  if (!account) {
+  try {
+    await client.query("BEGIN");
+
+    // Lock the account to serialize reset requests.
+    const accountResult = await client.query<ResetAccount>(
+      `SELECT id, email
+       FROM users
+       WHERE LOWER(email) = LOWER($1)
+       LIMIT 1
+       FOR UPDATE`,
+      [email]
+    );
+
+    account = accountResult.rows[0];
+
+    // Do not reveal whether the account exists.
+    if (!account) {
+      await client.query("COMMIT");
+      return;
+    }
+
+    const activityResult = await client.query<{
+      requests_last_hour: number;
+      latest_request: Date | null;
+    }>(
+      `SELECT
+         COUNT(*) FILTER (
+           WHERE created_at > NOW() - INTERVAL '1 hour'
+         )::int AS requests_last_hour,
+         MAX(created_at) AS latest_request
+       FROM password_reset_tokens
+       WHERE user_id = $1`,
+      [account.id]
+    );
+
+    const activity = activityResult.rows[0];
+
+    // Prevent excessive emails to one account.
+    if (
+      activity &&
+      (
+        activity.requests_last_hour >= 3 ||
+        (
+          activity.latest_request &&
+          Date.now() -
+            new Date(activity.latest_request).getTime() <
+            2 * 60 * 1000
+        )
+      )
+    ) {
+      await client.query("COMMIT");
+      return;
+    }
+
+    token = generateVerificationToken();
+
+    const tokenHash = hashVerificationToken(token);
+    const expiresAt = getVerificationTokenExpiry();
+
+    await client.query(
+      `INSERT INTO password_reset_tokens (
+        user_id,
+        token_hash,
+        expires_at
+      )
+      VALUES ($1, $2, $3)`,
+      [account.id, tokenHash, expiresAt]
+    );
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  if (!account || !token) {
     return;
   }
 
@@ -58,29 +130,9 @@ export async function requestPasswordReset(
     throw new Error("CLIENT_URL is not configured.");
   }
 
-  const token = generateVerificationToken();
-  const tokenHash = hashVerificationToken(token);
-  const expiresAt = getVerificationTokenExpiry();
-
-  await pool.query(
-    `INSERT INTO password_reset_tokens (
-      user_id,
-      token_hash,
-      expires_at
-    )
-    VALUES ($1, $2, $3)`,
-    [account.id, tokenHash, expiresAt]
-  );
-
-  const resetUrl = new URL(
-    "/reset-password",
-    clientUrl
-  );
-
+  const resetUrl = new URL("/reset-password", clientUrl);
   resetUrl.searchParams.set("token", token);
 
-  // The URL is constructed from a trusted configuration
-  // value and a hexadecimal token.
   const safeUrl = resetUrl
     .toString()
     .replace(/&/g, "&amp;")
@@ -91,11 +143,6 @@ export async function requestPasswordReset(
   const html = `
     <!DOCTYPE html>
     <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0" />
-      </head>
       <body style="
         margin: 0;
         padding: 32px 16px;
@@ -110,10 +157,7 @@ export async function requestPasswordReset(
           background-color: #FFFFFF;
           border-radius: 12px;
         ">
-          <h1 style="color: #A64B32;">
-            Walo
-          </h1>
-
+          <h1 style="color: #A64B32;">Walo</h1>
           <h2>Reset your password</h2>
 
           <p>
@@ -135,13 +179,11 @@ export async function requestPasswordReset(
             </a>
           </p>
 
-          <p>
-            This link expires after 30 minutes.
-          </p>
+          <p>This link expires after 30 minutes.</p>
 
           <p>
-            If you did not request a password
-            reset, you can ignore this email.
+            If you did not request this password reset,
+            you can ignore this email.
           </p>
 
           <p style="
@@ -162,6 +204,7 @@ export async function requestPasswordReset(
     html
   );
 }
+
 
 /**
  * Resets an account password using a single-use token.
