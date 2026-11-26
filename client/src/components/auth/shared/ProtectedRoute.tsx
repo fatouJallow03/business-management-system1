@@ -8,17 +8,31 @@ import {
 import { useAuth } from "../../../hooks/useAuth";
 
 /**
- * Protects routes that require authentication.
- *
- * Waits for session restoration before determining
- * whether the user can access a protected page.
- *
- * Redirects unauthenticated users to the login page.
- *
- * @returns Protected page content or login redirect.
+ * Configuration for protected routes.
  */
-export default function ProtectedRoute() {
-  const { isAuthenticated, loading } = useAuth();
+interface ProtectedRouteProps {
+  requireVerifiedEmail?: boolean;
+}
+
+/**
+ * Protects Walo routes using the authenticated session.
+ *
+ * Responsibilities:
+ * - Wait for session restoration.
+ * - Redirect unauthenticated users to login.
+ * - Optionally require email verification.
+ * - Preserve the requested location for login redirects.
+ *
+ * The backend independently enforces verification
+ * for protected business endpoints.
+ *
+ * @param requireVerifiedEmail - Whether verified email is required.
+ * @returns Protected content or the appropriate redirect.
+ */
+export default function ProtectedRoute({
+  requireVerifiedEmail = false,
+}: ProtectedRouteProps) {
+  const { user, isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -29,11 +43,20 @@ export default function ProtectedRoute() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return (
       <Navigate
         to="/login"
         state={{ from: location }}
+        replace
+      />
+    );
+  }
+
+  if (requireVerifiedEmail && !user.emailVerified) {
+    return (
+      <Navigate
+        to="/verify-email/pending"
         replace
       />
     );

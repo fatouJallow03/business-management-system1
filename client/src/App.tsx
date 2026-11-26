@@ -16,10 +16,16 @@ import VerifyEmailPage from "./pages/VerifyEmailPage/VerifyEmailPage";
 import PendingVerificationPage from "./pages/VerifyEmailPage/PendingVerificationPage";
 
 /**
- * Defines Walo's application routes.
+ * Defines Walo's application routing structure.
  *
- * Separates public verification links,
- * guest-only pages and protected routes.
+ * Routes are divided into:
+ * - Public email verification.
+ * - Guest-only authentication pages.
+ * - Authenticated account verification.
+ * - Email-verified business pages.
+ *
+ * Business APIs independently enforce authorization
+ * on the backend.
  *
  * @returns The application's route configuration.
  */
@@ -47,19 +53,29 @@ export default function App() {
         />
       </Route>
 
-      {/* PROTECTED ROUTES */}
+      {/* AUTHENTICATED ROUTES */}
 
       <Route element={<ProtectedRoute />}>
+        {/* Unverified users must be able to access this page. */}
+
         <Route
           path="/verify-email/pending"
           element={<PendingVerificationPage />}
         />
 
-        <Route element={<Layout />}>
-          <Route
-            path="/"
-            element={<HomePage />}
-          />
+        {/* VERIFIED BUSINESS ROUTES */}
+
+        <Route
+          element={
+            <ProtectedRoute requireVerifiedEmail />
+          }
+        >
+          <Route element={<Layout />}>
+            <Route
+              path="/"
+              element={<HomePage />}
+            />
+          </Route>
         </Route>
       </Route>
     </Routes>
