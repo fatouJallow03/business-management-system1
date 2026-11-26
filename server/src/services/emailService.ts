@@ -33,8 +33,12 @@ export async function sendEmail(
     html,
   });
 
-  if (error) {
-    console.error("Email sending failed:", error.name);
-    throw new Error("Unable to send email.");
-  }
+ if (error) {
+  console.error("Resend email delivery failed:", {
+    name: error.name,
+    message: error.message,
+  });
+
+  throw new Error("Unable to send email.");
+}
 }

@@ -1,61 +1,37 @@
 
-import { Routes, Route } from "react-router-dom";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 
-// LAYOUT
-import Layout from "./components/layout/Layout";
+import App from "./App";
+import AuthProvider from "./context/AuthProvider";
 
-// AUTHENTICATION
-import ProtectedRoute from "./components/auth/shared/ProtectedRoute";
-import PublicRoute from "./components/auth/shared/PublicRoute";
-
-// PAGES
-import RegisterPage from "./pages/RegisterPage/RegisterPage";
-import HomePage from "./pages/HomePage/HomePage";
-import LoginPage from "./pages/LoginPage/LoginPage";
-import VerifyEmailPage from "./pages/VerifyEmailPage/VerifyEmailPage";
+import "./styles/main.scss";
 
 /**
- * Defines Walo's application routing structure.
+ * Initializes the Walo application.
  *
- * Separates guest-only routes from authenticated
- * routes and publicly accessible verification flows.
+ * Responsibilities:
+ * - Mounts React into the root HTML element.
+ * - Enables React development checks.
+ * - Provides client-side routing.
+ * - Initializes global authentication state.
  *
- * @returns Application routes.
+ * Authentication sessions are managed through
+ * secure HTTP-only cookies by the backend.
  */
-export default function App() {
-  return (
-    <Routes>
-      {/* PUBLIC VERIFICATION ROUTES */}
+const rootElement = document.getElementById("root");
 
-      <Route
-        path="/verify-email"
-        element={<VerifyEmailPage />}
-      />
-
-      {/* GUEST-ONLY ROUTES */}
-
-      <Route element={<PublicRoute />}>
-        <Route
-          path="/register"
-          element={<RegisterPage />}
-        />
-
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
-      </Route>
-
-      {/* PROTECTED ROUTES */}
-
-      <Route element={<ProtectedRoute />}>
-        <Route element={<Layout />}>
-          <Route
-            path="/"
-            element={<HomePage />}
-          />
-        </Route>
-      </Route>
-    </Routes>
-  );
+if (!rootElement) {
+  throw new Error("Walo root element was not found.");
 }
+
+createRoot(rootElement).render(
+  <StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </BrowserRouter>
+  </StrictMode>
+);
