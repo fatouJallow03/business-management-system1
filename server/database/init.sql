@@ -10,6 +10,9 @@ CREATE TABLE  IF NOT EXISTS businesses (
     currency VARCHAR(3) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE UNIQUE INDEX IF NOT EXISTS unique_business_name
+ON businesses (LOWER(TRIM(name)));
+
 CREATE TABLE IF NOT EXISTS subscription_plans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(50) UNIQUE NOT NULL,
@@ -48,7 +51,11 @@ CREATE TABLE IF NOT EXISTS users(
     role VARCHAR(20) NOT NULL CHECK(role In ('owner', 'manager', 'employee')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CHECK (phone_number IS NOT NULL OR email IS NOT NULL)
-);
+)
+;-- Prevent duplicate usernames regardless of capitalization.
+CREATE UNIQUE INDEX IF NOT EXISTS unique_username
+ON users (LOWER(TRIM(username)));
+
 CREATE TABLE IF NOT EXISTS units (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(50) UNIQUE NOT NULL,

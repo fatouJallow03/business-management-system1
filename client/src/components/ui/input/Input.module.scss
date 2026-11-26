@@ -1,0 +1,160 @@
+
+
+/**
+ * Input field container.
+ */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: $color-text;
+  }
+}
+
+/**
+ * Shared input appearance.
+ */
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 12px 14px;
+
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+
+  background: $color-surface;
+  color: $color-text;
+
+  font: inherit;
+  font-size: 14px;
+
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+
+  &::placeholder {
+    color: $color-muted;
+  }
+
+  &:focus {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  &.success {
+    border-color: $color-success;
+
+    &:focus {
+      outline-color: $color-success;
+    }
+  }
+
+  &.error {
+    border-color: $color-error;
+
+    &:focus {
+      outline-color: $color-error;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/**
+ * Required field indicator.
+ */
+.required {
+  color: $color-primary;
+}
+
+/**
+ * Validation feedback.
+ */
+.feedback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+
+  animation: reveal 200ms ease-out;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.idleFeedback,
+.checkingFeedback {
+  color: $color-muted;
+}
+
+.successFeedback {
+  color: $color-success;
+}
+
+.errorFeedback {
+  color: $color-error;
+}
+
+/**
+ * Loading indicator.
+ */
+.spinner {
+  animation: spin 800ms linear infinite;
+}
+
+/* ANIMATIONS */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Mobile responsiveness.
+ */
+@media (max-width: 480px) {
+  .input {
+    font-size: 16px;
+  }
+}
+
+/**
+ * Accessibility.
+ * Respects reduced-motion preferences.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
+
+  .feedback,
+  .spinner {
+    animation: none;
+  }
+}

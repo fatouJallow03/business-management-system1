@@ -1,110 +1,268 @@
 
+@use "../../../styles/variables" as *;
+
+/**
+ * Main authenticated application header.
+ */
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   width: 100%;
   background: $color-background;
   border-bottom: 1px solid $color-border;
 }
 
+/**
+ * Responsive header content.
+ */
 .container {
+  box-sizing: border-box;
   width: 100%;
-  max-width: 1200px;
-  margin-inline: auto;
-  padding: 16px 24px;
+  min-height: 64px;
+  padding: 10px 24px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
 }
+
+/* LOGO */
 
 .logo {
-  font-family: Georgia, serif;
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: -2px;
-  color: $color-primary;
-  text-decoration: none;
-
-  span {
-    color: $color-secondary;
-  }
-}
-
-.nav {
   display: flex;
   align-items: center;
-  gap: 32px;
+  flex-shrink: 0;
+}
 
-  a {
+/* ACCOUNT */
+
+.account {
+  position: relative;
+  min-width: 0;
+}
+
+.accountButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  max-width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: $radius-md;
+
+  color: $color-text;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  transition: background-color 200ms ease;
+
+  &:hover {
+    background: rgba($color-secondary, 0.18);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+/**
+ * User avatar generated from the username.
+ */
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+
+  background: $color-secondary;
+  color: $color-text;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.accountDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.businessName {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.role {
+  font-size: 11px;
+  color: $color-muted;
+  text-transform: capitalize;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: $color-muted;
+  transition: transform 200ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ACCOUNT DROPDOWN */
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+
+  box-sizing: border-box;
+  width: 260px;
+  max-width: calc(100vw - 32px);
+  padding: 10px;
+
+  background: $color-background;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+
+  box-shadow: 0 8px 24px rgba($color-text, 0.1);
+
+  animation: reveal 180ms ease-out;
+}
+
+.dropdownHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+
+  strong {
     color: $color-text;
     font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-
-    &:hover {
-      color: $color-primary;
-    }
-
-    &[aria-current="page"] {
-      color: $color-primary;
-    }
+    overflow-wrap: anywhere;
   }
 
-  .registerButton {
-    background: $color-primary;
-    color: white;
-    padding: 12px 20px;
-    border-radius: $radius-sm;
-
-    &:hover {
-      background: #8d3e29;
-      color: white;
-    }
+  span {
+    color: $color-muted;
+    font-size: 12px;
+    overflow-wrap: anywhere;
   }
 }
 
-.menuButton {
-  display: none;
-  background: none;
+.divider {
+  height: 1px;
+  margin: 6px 0;
+  background: $color-border;
+}
+
+/* LOGOUT */
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+
   border: 0;
-  color: $color-primary;
-  font-size: 26px;
+  border-radius: $radius-sm;
+  background: transparent;
+
+  color: $color-error;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+
   cursor: pointer;
+
+  transition: background-color 200ms ease;
+
+  &:hover:not(:disabled) {
+    background: rgba($color-error, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-error;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
+
+.error {
+  margin: 8px 10px;
+  font-size: 12px;
+  color: $color-error;
+  overflow-wrap: anywhere;
+}
+
+/* ANIMATIONS */
+
+.spinner {
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* MOBILE RESPONSIVENESS */
 
 @media (max-width: 767px) {
   .container {
-    padding: 14px 16px;
+    padding: 8px 16px;
   }
 
-  .menuButton {
-    display: block;
-  }
-
-  .nav {
+  .accountDetails {
     display: none;
-    position: absolute;
-    top: 70px;
-    left: 0;
-    right: 0;
-    z-index: 20;
-
-    padding: 24px 16px;
-    background: $color-background;
-    border-bottom: 1px solid $color-border;
-
-    flex-direction: column;
-    align-items: stretch;
-    gap: 24px;
-  }
-
-  .navOpen {
-    display: flex;
   }
 }
 
-@media (max-width: 359px) {
-  .container {
-    padding-inline: 12px;
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown,
+  .spinner {
+    animation: none;
+  }
+
+  .accountButton,
+  .chevron,
+  .logoutButton {
+    transition: none;
   }
 }

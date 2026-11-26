@@ -1,0 +1,191 @@
+
+.heading {
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 10px;
+    font-family: Georgia, serif;
+    font-size: clamp(28px, 3vw, 36px);
+    line-height: 1.15;
+    color: #402818;
+  }
+
+  p {
+    margin: 0;
+    color: #745e50;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text;
+  }
+}
+
+.form select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid #d9c6b7;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  color: $color-text;
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 200ms, box-shadow 200ms;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(166, 75, 50, 0.12);
+  }
+}
+
+/**
+ * Positions the password visibility button
+ * without being affected by validation messages.
+ */
+.passwordField {
+  position: relative;
+
+  input {
+    padding-right: 48px;
+  }
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 30px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: $color-muted;
+  cursor: pointer;
+
+  transition: color 200ms ease;
+
+  &:hover {
+    color: $color-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+  }
+}
+.primaryButton,
+.secondaryButton {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 200ms, transform 200ms;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 3px;
+  }
+}
+
+.primaryButton {
+  flex: 1;
+  background: $color-primary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #8d3e29;
+  }
+}
+
+.secondaryButton {
+  border-color: #d8a789;
+  background: #f9e2d0;
+  color: #6c3a25;
+
+  &:hover:not(:disabled) {
+    background: #f3d5be;
+  }
+}
+
+.errorMessage {
+  margin: 0;
+  color: $color-error;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.footerText {
+  margin: 24px 0 0;
+  color: $color-muted;
+  text-align: center;
+  font-size: 13px;
+
+  a {
+    color: $color-primary;
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .form input:not([type="radio"]):not([type="checkbox"]),
+  .form select {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form input,
+  .form select,
+  .primaryButton,
+  .secondaryButton {
+    transition: none;
+  }
+
+  .primaryButton:active,
+  .secondaryButton:active {
+    transform: none;
+  }
+}
