@@ -3,6 +3,7 @@ import { Router } from "express";
 
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { requireVerifiedEmail } from "../middleware/requireVerifiedEmail.js";
+import { roleMiddleware } from "../middleware/roleMiddleware.js";
 
 import {
   getProducts,
@@ -13,25 +14,54 @@ import {
 } from "../controllers/productController.js";
 
 /**
- * Product routes for authenticated,
- * email-verified Walo business users.
+ * Product routes protected by Walo's
+ * authentication, email verification,
+ * and role-based authorization.
  *
- * Authentication validates the active session.
- * Email verification is required before accessing
- * any business inventory data.
- *
- * Product queries must also remain scoped
- * to the authenticated business.
+ * Every product operation must also
+ * enforce business-level data isolation
+ * inside the service layer.
  */
 const router = Router();
 
+// Require a valid authenticated session.
 router.use(authMiddleware);
+
+// Require verified business-user email.
 router.use(requireVerifiedEmail);
 
-router.get("/", getProducts);
-router.get("/:id", getProduct);
-router.post("/", createProduct);
-router.patch("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+// All authenticated roles may view products.
+router.get(
+  "/",
+  roleMiddleware("owner", "manager", "employee"),
+  getProducts
+);
+
+router.get(
+  "/:id",
+  roleMiddleware("owner", "manager", "employee"),
+  getProduct
+);
+
+// Owners and managers may create products.
+router.post(
+  "/",
+  roleMiddleware("owner", "manager"),
+  createProduct
+);
+
+// Owners and managers may update products.
+router.patch(
+  "/:id",
+  roleMiddleware("owner", "manager"),
+  updateProduct
+);
+
+// Only owners may delete products.
+router.delete(
+  "/:id",
+  roleMiddleware("owner"),
+  deleteProduct
+);
 
 export default router;
