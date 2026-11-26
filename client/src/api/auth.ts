@@ -300,3 +300,89 @@ export async function resendVerificationEmail():
 
   return data;
 }
+
+
+/**
+ * Response returned by password recovery endpoints.
+ */
+export interface PasswordRecoveryResponse {
+  message: string;
+}
+
+/**
+ * Requests a password reset email.
+ *
+ * The backend returns a generic response to prevent
+ * account enumeration.
+ *
+ * @param email - Account email address.
+ * @returns Generic request confirmation.
+ */
+export async function requestPasswordReset(
+  email: string
+): Promise<PasswordRecoveryResponse> {
+  const response = await fetch(
+    `${API_URL}/auth/forgot-password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    }
+  );
+
+  const data: PasswordRecoveryResponse =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Unable to request password reset."
+    );
+  }
+
+  return data;
+}
+
+/**
+ * Replaces a password using a single-use reset token.
+ *
+ * The backend validates the token and password,
+ * updates the password hash, and revokes sessions.
+ *
+ * @param token - Password reset token.
+ * @param password - New account password.
+ * @param confirmPassword - Password confirmation.
+ * @returns Reset confirmation.
+ */
+export async function resetAccountPassword(
+  token: string,
+  password: string,
+  confirmPassword: string
+): Promise<PasswordRecoveryResponse> {
+  const response = await fetch(
+    `${API_URL}/auth/reset-password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token,
+        password,
+        confirmPassword,
+      }),
+    }
+  );
+
+  const data: PasswordRecoveryResponse =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Unable to reset your password."
+    );
+  }
+
+  return data;
+}

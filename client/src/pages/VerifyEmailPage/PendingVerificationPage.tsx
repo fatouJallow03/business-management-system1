@@ -1,18 +1,25 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 import {
   Mail,
   RefreshCw,
   CheckCircle2,
   LoaderCircle,
+  LogOut,
 } from "lucide-react";
 
+// COMPONENTS
 import AuthLayout from "../../components/auth/shared/AuthLayout";
 
+// API
 import { resendVerificationEmail } from "../../api/auth";
+
+// HOOKS
 import { useAuth } from "../../hooks/useAuth";
 
+// STYLES
 import sharedStyles from "../../components/auth/shared/AuthForm.module.scss";
 import styles from "./VerifyEmailPage.module.scss";
 
@@ -20,19 +27,27 @@ import styles from "./VerifyEmailPage.module.scss";
  * Displays the email verification status for an
  * authenticated Walo user.
  *
- * Allows users to request another verification
- * email and refresh their account status.
+ * Responsibilities:
+ * - Display the current user's email address.
+ * - Request another verification email.
+ * - Refresh the email verification status.
+ * - Allow users to sign out and switch accounts.
+ * - Provide access to the dashboard after verification.
  *
  * Reuses existing authentication components,
  * API functions, and global authentication state.
  *
- * @returns Pending email verification page.
+ * @returns The pending email verification page.
  */
 export default function PendingVerificationPage() {
-  const { user, refreshSession } = useAuth();
+  const navigate = useNavigate();
+
+  const { user, refreshSession, logout } = useAuth();
 
   const [sending, setSending] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -41,7 +56,7 @@ export default function PendingVerificationPage() {
    * authenticated user's current session.
    */
   async function handleResend(): Promise<void> {
-    if (sending) return;
+    if (sending || checking || signingOut) return;
 
     setSending(true);
     setError("");
@@ -63,11 +78,11 @@ export default function PendingVerificationPage() {
   }
 
   /**
-   * Refreshes the current user from PostgreSQL
+   * Refreshes the current user's verification status
    * through the existing authentication context.
    */
   async function handleCheckStatus(): Promise<void> {
-    if (checking) return;
+    if (checking || sending || signingOut) return;
 
     setChecking(true);
     setError("");
@@ -88,17 +103,58 @@ export default function PendingVerificationPage() {
     }
   }
 
+  /**
+   * Ends the current authenticated session.
+   *
+   * The backend revokes the PostgreSQL session
+   * and clears the HTTP-only authentication cookie.
+   *
+   * Users are redirected to login after the
+   * logout request succeeds.
+   */
+  async function handleLogout(): Promise<void> {
+    if (signingOut || sending || checking) return;
+
+    setSigningOut(true);
+    setError("");
+    setMessage("");
+
+    try {
+      await logout();
+
+      navigate("/login", {
+        replace: true,
+      });
+    } catch {
+      setError(
+        "Unable to sign out. Please try again."
+      );
+    } finally {
+      setSigningOut(false);
+    }
+  }
+
+  const busy = sending || checking || signingOut;
+
   return (
     <AuthLayout variant="login">
       <div className={styles.content}>
         {user?.emailVerified ? (
           <>
-            <div className={`${styles.icon} ${styles.success}`}>
-              <CheckCircle2 size={32} aria-hidden="true" />
+            {/* VERIFIED ACCOUNT */}
+
+            <div
+              className={`${styles.icon} ${styles.success}`}
+            >
+              <CheckCircle2
+                size={32}
+                aria-hidden="true"
+              />
             </div>
 
             <header className={sharedStyles.heading}>
               <h1>Email verified!</h1>
+
               <p>
                 Your email address has been verified
                 successfully. You can continue to Walo.
@@ -114,8 +170,13 @@ export default function PendingVerificationPage() {
           </>
         ) : (
           <>
+            {/* PENDING EMAIL VERIFICATION */}
+
             <div className={styles.icon}>
-              <Mail size={32} aria-hidden="true" />
+              <Mail
+                size={32}
+                aria-hidden="true"
+              />
             </div>
 
             <header className={sharedStyles.heading}>
@@ -127,6 +188,8 @@ export default function PendingVerificationPage() {
               </p>
             </header>
 
+            {/* ACCOUNT EMAIL */}
+
             {user?.email && (
               <p className={styles.helperText}>
                 Verification email:{" "}
@@ -134,26 +197,13 @@ export default function PendingVerificationPage() {
               </p>
             )}
 
-            {message && (
-              <p role="status" className={styles.helperText}>
-                {message}
-              </p>
-            )}
-
-            {error && (
-              <p
-                role="alert"
-                className={sharedStyles.errorMessage}
-              >
-                {error}
-              </p>
-            )}
+            {/* RESEND VERIFICATION EMAIL */}
 
             <button
               type="button"
               className={sharedStyles.primaryButton}
               onClick={handleResend}
-              disabled={sending || checking || !user?.email}
+              disabled={busy || !user?.email}
             >
               {sending ? (
                 <>
@@ -166,17 +216,22 @@ export default function PendingVerificationPage() {
                 </>
               ) : (
                 <>
-                  <Mail size={18} aria-hidden="true" />
+                  <Mail
+                    size={18}
+                    aria-hidden="true"
+                  />
                   Resend verification email
                 </>
               )}
             </button>
 
+            {/* REFRESH VERIFICATION STATUS */}
+
             <button
               type="button"
               className={sharedStyles.secondaryButton}
               onClick={handleCheckStatus}
-              disabled={checking || sending}
+              disabled={busy}
             >
               {checking ? (
                 <>
@@ -189,7 +244,10 @@ export default function PendingVerificationPage() {
                 </>
               ) : (
                 <>
-                  <RefreshCw size={18} aria-hidden="true" />
+                  <RefreshCw
+                    size={18}
+                    aria-hidden="true"
+                  />
                   I've verified my email
                 </>
               )}
@@ -199,14 +257,58 @@ export default function PendingVerificationPage() {
               Verification links expire after 30 minutes.
               If yours has expired, request a new one.
             </p>
-
-            <p className={sharedStyles.footerText}>
-              <Link to="/">
-                Back to dashboard
-              </Link>
-            </p>
           </>
         )}
+
+        {/* STATUS MESSAGE */}
+
+        {message && (
+          <p
+            role="status"
+            className={styles.helperText}
+          >
+            {message}
+          </p>
+        )}
+
+        {/* ERROR MESSAGE */}
+
+        {error && (
+          <p
+            role="alert"
+            className={sharedStyles.errorMessage}
+          >
+            {error}
+          </p>
+        )}
+
+        {/* SIGN OUT */}
+
+        <button
+          type="button"
+          className={sharedStyles.secondaryButton}
+          onClick={handleLogout}
+          disabled={busy}
+        >
+          {signingOut ? (
+            <>
+              <LoaderCircle
+                size={18}
+                className={styles.spinner}
+                aria-hidden="true"
+              />
+              Signing out...
+            </>
+          ) : (
+            <>
+              <LogOut
+                size={18}
+                aria-hidden="true"
+              />
+              Sign out
+            </>
+          )}
+        </button>
       </div>
     </AuthLayout>
   );

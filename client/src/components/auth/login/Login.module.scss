@@ -47,6 +47,32 @@
     transform: rotate(360deg);
   }
 }
+/**
+ * Aligns the password recovery link
+ * beneath the password input.
+ */
+.forgotPassword {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+
+  a {
+    color: #a64b32;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #a64b32;
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+  }
+}
 
 /**
  * Accessibility.

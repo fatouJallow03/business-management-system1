@@ -14,50 +14,50 @@ import HomePage from "./pages/HomePage/HomePage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage/VerifyEmailPage";
 import PendingVerificationPage from "./pages/VerifyEmailPage/PendingVerificationPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage/ResetPasswordPage";
 
 /**
- * Defines Walo's application routing structure.
+ * Defines Walo's application routes.
  *
- * Routes are divided into:
- * - Public email verification.
- * - Guest-only authentication pages.
- * - Authenticated account verification.
- * - Email-verified business pages.
+ * Public password recovery remains accessible
+ * even if a browser has an existing session.
  *
- * Business APIs independently enforce authorization
- * on the backend.
+ * Business routes require authentication and
+ * email verification.
  *
- * @returns The application's route configuration.
+ * @returns Walo route configuration.
  */
 export default function App() {
   return (
     <Routes>
-      {/* PUBLIC EMAIL VERIFICATION */}
+      {/* PUBLIC ACCOUNT RECOVERY */}
 
       <Route
         path="/verify-email"
         element={<VerifyEmailPage />}
       />
 
+      <Route
+        path="/forgot-password"
+        element={<ForgotPasswordPage />}
+      />
+
+      <Route
+        path="/reset-password"
+        element={<ResetPasswordPage />}
+      />
+
       {/* GUEST-ONLY ROUTES */}
 
       <Route element={<PublicRoute />}>
-        <Route
-          path="/register"
-          element={<RegisterPage />}
-        />
-
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Route>
 
       {/* AUTHENTICATED ROUTES */}
 
       <Route element={<ProtectedRoute />}>
-        {/* Unverified users must be able to access this page. */}
-
         <Route
           path="/verify-email/pending"
           element={<PendingVerificationPage />}
@@ -65,16 +65,9 @@ export default function App() {
 
         {/* VERIFIED BUSINESS ROUTES */}
 
-        <Route
-          element={
-            <ProtectedRoute requireVerifiedEmail />
-          }
-        >
+        <Route element={<ProtectedRoute requireVerifiedEmail />}>
           <Route element={<Layout />}>
-            <Route
-              path="/"
-              element={<HomePage />}
-            />
+            <Route path="/" element={<HomePage />} />
           </Route>
         </Route>
       </Route>

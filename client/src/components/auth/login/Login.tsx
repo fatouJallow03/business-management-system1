@@ -157,7 +157,15 @@ export default function Login() {
             </button>
           </div>
 
-          {/* AUTHENTICATION ERROR */}
+     {/* PASSWORD RECOVERY */}
+
+<div className={styles.forgotPassword}>
+  <Link to="/forgot-password">
+    Forgot password?
+  </Link>
+</div>
+
+{/* AUTHENTICATION ERROR */}
 
           {error && (
             <p
