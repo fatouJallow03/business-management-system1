@@ -1,24 +1,61 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 
-import App from "./App";
-import AuthProvider from "./context/AuthProvider";
+import { Routes, Route } from "react-router-dom";
 
-import "./styles/main.scss";
+// LAYOUT
+import Layout from "./components/layout/Layout";
+
+// AUTHENTICATION
+import ProtectedRoute from "./components/auth/shared/ProtectedRoute";
+import PublicRoute from "./components/auth/shared/PublicRoute";
+
+// PAGES
+import RegisterPage from "./pages/RegisterPage/RegisterPage";
+import HomePage from "./pages/HomePage/HomePage";
+import LoginPage from "./pages/LoginPage/LoginPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage/VerifyEmailPage";
 
 /**
- * Application entry point.
+ * Defines Walo's application routing structure.
  *
- * Initializes React, client-side routing,
- * global authentication and application styles.
+ * Separates guest-only routes from authenticated
+ * routes and publicly accessible verification flows.
+ *
+ * @returns Application routes.
  */
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>
-);
+export default function App() {
+  return (
+    <Routes>
+      {/* PUBLIC VERIFICATION ROUTES */}
+
+      <Route
+        path="/verify-email"
+        element={<VerifyEmailPage />}
+      />
+
+      {/* GUEST-ONLY ROUTES */}
+
+      <Route element={<PublicRoute />}>
+        <Route
+          path="/register"
+          element={<RegisterPage />}
+        />
+
+        <Route
+          path="/login"
+          element={<LoginPage />}
+        />
+      </Route>
+
+      {/* PROTECTED ROUTES */}
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route
+            path="/"
+            element={<HomePage />}
+          />
+        </Route>
+      </Route>
+    </Routes>
+  );
+}

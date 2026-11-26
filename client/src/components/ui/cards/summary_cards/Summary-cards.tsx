@@ -1,6 +1,5 @@
 import styles from "./SummaryCards.module.scss";
-import type { SummaryCardsProps } from "../../types/product";
-
+import type { SummaryCardsProps } from "../../../../types/product";
 export default function SummaryCards({ title, value, icon }: SummaryCardsProps) {
   return (
     <div className={styles.summaryCard}>
@@ -11,4 +10,4 @@ export default function SummaryCards({ title, value, icon }: SummaryCardsProps) 
       </div>
     </div>
   );
-}
+};

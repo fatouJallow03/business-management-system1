@@ -4,7 +4,7 @@ import type { Product } from "../../../types/product";
 import styles from "./InventoryList.module.scss"
 import SearchBar from "../search/searchBar/SearchBar";
 import { getProducts } from "../../../api/products";
-import ProductCard from "../../cards/productCard/ProductCard";
+import ProductCard from "../../ui/cards/productCard/ProductCard";
 
 
 

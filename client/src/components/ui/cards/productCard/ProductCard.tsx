@@ -1,4 +1,4 @@
-import type { ProductCardProps } from "../../../types/product";
+import type { ProductCardProps } from "../../../../types/product";
 import styles from "./ProductCardContainer.module.scss"
 
 export default function ProductCard({product}: ProductCardProps){

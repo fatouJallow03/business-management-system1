@@ -1,3 +1,4 @@
+
 /**
  * Supported user roles within Walo.
  */
@@ -8,6 +9,9 @@ export type UserRole =
 
 /**
  * Represents an authenticated Walo user.
+ *
+ * Includes their business membership, role,
+ * and current email verification status.
  */
 export interface AuthUser {
   id: string;
@@ -16,6 +20,7 @@ export interface AuthUser {
   role: UserRole;
   businessId: string;
   businessName: string;
+  emailVerified: boolean;
 }
 
 /**
@@ -27,6 +32,9 @@ export interface AuthResponse {
 
 /**
  * Defines the global authentication context.
+ *
+ * Authentication state is managed using
+ * HTTP-only session cookies.
  */
 export interface AuthContextType {
   user: AuthUser | null;

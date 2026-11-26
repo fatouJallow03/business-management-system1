@@ -3,24 +3,22 @@ import { API_URL } from "./url";
 import type { RegistrationData } from "../components/auth/register/types";
 
 /**
- * Authenticates an existing Walo user.
- *
- * Sends the user's credentials to the backend,
- * where the password is verified against its stored hash.
- *
- * @param identifier - The user's email address.
- * @param password - The user's password.
- * @returns Authentication token and user information.
- * @throws Error if authentication fails.
+ * Response returned by email verification endpoints.
  */
+export interface EmailVerificationResponse {
+  message: string;
+}
+
 /**
- * Authenticates a user using email and password.
+ * Authenticates a Walo user using email and password.
  *
- * Allows the browser to receive the HTTP-only
- * authentication cookie from the backend.
+ * The backend validates the credentials and creates
+ * an HTTP-only authentication cookie.
  *
- * @param identifier - The user's email address.
- * @param password - The user's password.
+ * The JWT is never exposed to client-side JavaScript.
+ *
+ * @param identifier - User's email address.
+ * @param password - User's password.
  * @returns Authenticated user information.
  * @throws Error if authentication fails.
  */
@@ -30,13 +28,10 @@ export async function loginUser(
 ) {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
-
     credentials: "include",
-
     headers: {
       "Content-Type": "application/json",
     },
-
     body: JSON.stringify({
       identifier,
       password,
@@ -57,91 +52,95 @@ export async function loginUser(
 /**
  * Registers a new business and its initial owner.
  *
- * Transforms frontend field names into the format
- * expected by the backend registration schema.
+ * Transforms frontend registration fields into
+ * the structure expected by the backend Zod schema.
  *
- * @param data - The complete registration form data.
- * @returns Registered business, owner and subscription.
+ * @param data - Validated registration form data.
+ * @returns Created business, owner, and subscription.
  * @throws Error if registration fails.
  */
 export async function registerBusiness(
-    data: RegistrationData
+  data: RegistrationData
 ) {
-    const response = await fetch(`${API_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
+  const response = await fetch(
+    `${API_URL}/auth/register`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        business: {
+          name: data.business.name,
+          email: data.business.email,
+          phone_number: data.business.phone,
+          address: data.business.address,
+          city: data.business.city,
+          country: data.business.country,
+          business_type: data.business.type,
+          currency: data.business.currency,
         },
-        body: JSON.stringify({
-            business: {
-                name: data.business.name,
-                email: data.business.email,
-                phone_number: data.business.phone,
-                address: data.business.address,
-                city: data.business.city,
-                country: data.business.country,
-                business_type: data.business.type,
-                currency: data.business.currency
-            },
-            owner: {
-                username: data.owner.username,
-                email: data.owner.email,
-                password: data.owner.password,
-                confirmPassword: data.owner.confirmPassword
-            }
-        })
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-        throw new Error(
-            result.message || "Registration failed"
-        );
+        owner: {
+          username: data.owner.username,
+          email: data.owner.email,
+          password: data.owner.password,
+          confirmPassword: data.owner.confirmPassword,
+        },
+      }),
     }
+  );
 
-    return result;
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Registration failed."
+    );
+  }
+
+  return result;
 }
 
 /**
- * Checks whether a business name is available.
+ * Checks business name availability.
  *
- * Supports request cancellation to prevent outdated
- * results when the user continues typing.
+ * Supports request cancellation to avoid processing
+ * outdated results while a user is typing.
  *
- * @param name - The requested business name.
- * @param signal - Optional request cancellation signal.
- * @returns The availability status of the business name.
- * @throws Error if the availability check fails.
+ * @param name - Business name to check.
+ * @param signal - Optional AbortSignal.
+ * @returns Business name availability.
+ * @throws Error if the request fails.
  */
 export async function checkBusinessName(
-    name: string,
-    signal?: AbortSignal
+  name: string,
+  signal?: AbortSignal
 ): Promise<{ available: boolean }> {
-    const response = await fetch(
-        `${API_URL}/auth/check-business-name?name=${encodeURIComponent(name)}`,
-        { signal }
+  const response = await fetch(
+    `${API_URL}/auth/check-business-name?name=${encodeURIComponent(name)}`,
+    { signal }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to check business name."
     );
+  }
 
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(
-            data.message || "Failed to check business name"
-        );
-    }
-
-    return data;
+  return data;
 }
+
 /**
- * Checks whether a username is available for registration.
+ * Checks username availability.
  *
- * Sends a GET request to the authentication API.
- * Supports request cancellation to prevent outdated responses.
+ * Supports request cancellation to prevent
+ * outdated availability results.
  *
- * @param username - The requested username.
- * @param signal - Optional signal to cancel the request.
- * @returns An object containing username availability.
+ * @param username - Username to check.
+ * @param signal - Optional AbortSignal.
+ * @returns Username availability.
  * @throws Error if the request fails.
  */
 export async function checkUsername(
@@ -153,32 +152,46 @@ export async function checkUsername(
     { signal }
   );
 
+  const data = await response.json();
+
   if (!response.ok) {
-    throw new Error("Unable to check username availability.");
+    throw new Error(
+      data.message ||
+        "Unable to check username availability."
+    );
   }
 
-  return response.json();
+  return data;
 }
+
 /**
  * Retrieves the currently authenticated user.
  *
- * Sends the HTTP-only session cookie to the backend.
+ * Uses the HTTP-only session cookie to restore
+ * the user's authentication state.
  *
- * @returns Current user response or null if unauthenticated.
- * @throws Error if the request fails unexpectedly.
+ * Returns null if the session is missing or expired.
+ *
+ * @returns Current user response or null.
+ * @throws Error for unexpected server errors.
  */
 export async function getCurrentUser() {
-  const response = await fetch(`${API_URL}/auth/me`, {
-    method: "GET",
-    credentials: "include",
-  });
+  const response = await fetch(
+    `${API_URL}/auth/me`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
 
   if (response.status === 401) {
     return null;
   }
 
   if (!response.ok) {
-    throw new Error("Unable to retrieve your session.");
+    throw new Error(
+      "Unable to retrieve your session."
+    );
   }
 
   return response.json();
@@ -187,20 +200,103 @@ export async function getCurrentUser() {
 /**
  * Logs out the currently authenticated user.
  *
- * Requests the backend to clear the authentication cookie.
+ * Requests the backend to revoke the active
+ * PostgreSQL session and clear the HTTP-only cookie.
  *
- * @returns Successful logout response.
+ * @returns Logout confirmation.
  * @throws Error if logout fails.
  */
 export async function logoutUser() {
-  const response = await fetch(`${API_URL}/auth/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
+  const response = await fetch(
+    `${API_URL}/auth/logout`,
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
 
   if (!response.ok) {
-    throw new Error("Unable to log out. Please try again.");
+    throw new Error(
+      "Unable to log out. Please try again."
+    );
   }
 
   return response.json();
+}
+
+/**
+ * Verifies a user's email address.
+ *
+ * Submits the single-use token from the email
+ * verification link to the backend.
+ *
+ * The backend validates its hash, expiry,
+ * and previous usage before verifying the account.
+ *
+ * @param token - Verification token from the email.
+ * @returns Email verification confirmation.
+ * @throws Error if verification fails.
+ */
+export async function verifyEmail(
+  token: string
+): Promise<EmailVerificationResponse> {
+  const response = await fetch(
+    `${API_URL}/auth/verify-email`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token }),
+    }
+  );
+
+  const data: EmailVerificationResponse =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to verify your email."
+    );
+  }
+
+  return data;
+}
+
+/**
+ * Requests another email verification link.
+ *
+ * Uses the current HTTP-only authentication
+ * session to identify the user.
+ *
+ * The backend determines the recipient email
+ * from PostgreSQL rather than accepting an
+ * arbitrary email address from the frontend.
+ *
+ * @returns Verification resend confirmation.
+ * @throws Error if the request fails.
+ */
+export async function resendVerificationEmail():
+  Promise<EmailVerificationResponse> {
+  const response = await fetch(
+    `${API_URL}/auth/resend-verification`,
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
+
+  const data: EmailVerificationResponse =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to resend verification email."
+    );
+  }
+
+  return data;
 }

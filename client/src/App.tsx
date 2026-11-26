@@ -12,31 +12,54 @@ import PublicRoute from "./components/auth/shared/PublicRoute";
 import RegisterPage from "./pages/RegisterPage/RegisterPage";
 import HomePage from "./pages/HomePage/HomePage";
 import LoginPage from "./pages/LoginPage/LoginPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage/VerifyEmailPage";
+import PendingVerificationPage from "./pages/VerifyEmailPage/PendingVerificationPage";
 
 /**
- * Defines Walo's application routing structure.
+ * Defines Walo's application routes.
  *
- * Separates guest-only routes from protected routes.
- * Ensures users can only access pages appropriate
- * to their current authentication state.
+ * Separates public verification links,
+ * guest-only pages and protected routes.
  *
- * @returns The application routing configuration.
+ * @returns The application's route configuration.
  */
 export default function App() {
   return (
     <Routes>
+      {/* PUBLIC EMAIL VERIFICATION */}
+
+      <Route
+        path="/verify-email"
+        element={<VerifyEmailPage />}
+      />
+
       {/* GUEST-ONLY ROUTES */}
 
       <Route element={<PublicRoute />}>
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/register"
+          element={<RegisterPage />}
+        />
+
+        <Route
+          path="/login"
+          element={<LoginPage />}
+        />
       </Route>
 
       {/* PROTECTED ROUTES */}
 
       <Route element={<ProtectedRoute />}>
+        <Route
+          path="/verify-email/pending"
+          element={<PendingVerificationPage />}
+        />
+
         <Route element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/"
+            element={<HomePage />}
+          />
         </Route>
       </Route>
     </Routes>
